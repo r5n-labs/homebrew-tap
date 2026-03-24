@@ -8,7 +8,7 @@ Homebrew formulae for r5n-labs projects.
 brew tap r5n-labs/tap
 ```
 
-## Formulae
+## Available
 
 ### vigil
 
@@ -16,9 +16,15 @@ brew tap r5n-labs/tap
 brew install r5n-labs/tap/vigil
 ```
 
+### invoicy
+
+```bash
+brew install --cask r5n-labs/tap/invoicy
+```
+
 ## Updating
 
 ```bash
 brew update
-brew upgrade vigil
+brew upgrade
 ```

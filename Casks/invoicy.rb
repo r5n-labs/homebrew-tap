@@ -4,8 +4,8 @@ cask "invoicy" do
 
   url "https://releases.r5n.dev/Invoicy-macos-arm64.dmg"
   name "Invoicy"
-  desc "Desktop invoicing app for Polish JDG sole proprietors"
-  homepage "https://r5n.dev/invoicy"
+  desc "TBA"
+  homepage "https://r5n.dev/"
 
   depends_on macos: ">= :ventura"
 
