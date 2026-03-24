@@ -1,5 +1,5 @@
 class Vigil < Formula
-  desc "TBA"
+  desc "Self-custody crypto wallet for the terminal"
   homepage "https://github.com/r5n-labs/vigil"
   version "0.1.0"
   license "FSL-1.1-Apache-2.0"

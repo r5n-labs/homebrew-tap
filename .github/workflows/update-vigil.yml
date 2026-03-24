@@ -1,0 +1,110 @@
+name: Update Vigil formula
+
+on:
+  repository_dispatch:
+    types: [vigil-release]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v0.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-formula:
+    runs-on: r5n-m2-ultra
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve tag
+        id: resolve
+        env:
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          TAG="${DISPATCH_TAG:-$INPUT_TAG}"
+          if [ -z "$TAG" ]; then
+            echo "No tag provided"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download release artifacts
+        env:
+          TAG: ${{ steps.resolve.outputs.tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/vigil-release
+          gh release download "$TAG" \
+            --repo r5n-labs/vigil \
+            --pattern "vigil-*.zip" \
+            --pattern "vigil-*.tar.gz" \
+            -D /tmp/vigil-release
+
+      - name: Compute SHA256 hashes and update formula
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          sha_darwin_arm64=$(shasum -a 256 /tmp/vigil-release/vigil-darwin-arm64.zip | cut -d' ' -f1)
+          sha_darwin_x64=$(shasum -a 256 /tmp/vigil-release/vigil-darwin-x64.zip | cut -d' ' -f1)
+          sha_linux_arm64=$(shasum -a 256 /tmp/vigil-release/vigil-linux-arm64.tar.gz | cut -d' ' -f1)
+          sha_linux_x64=$(shasum -a 256 /tmp/vigil-release/vigil-linux-x64.tar.gz | cut -d' ' -f1)
+
+          cat > Formula/vigil.rb << RUBY
+          class Vigil < Formula
+            desc "Self-custody crypto wallet for the terminal"
+            homepage "https://github.com/r5n-labs/vigil"
+            version "${VERSION}"
+            license "FSL-1.1-Apache-2.0"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/r5n-labs/vigil/releases/download/${TAG}/vigil-darwin-arm64.zip"
+                sha256 "${sha_darwin_arm64}"
+              else
+                url "https://github.com/r5n-labs/vigil/releases/download/${TAG}/vigil-darwin-x64.zip"
+                sha256 "${sha_darwin_x64}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/r5n-labs/vigil/releases/download/${TAG}/vigil-linux-arm64.tar.gz"
+                sha256 "${sha_linux_arm64}"
+              else
+                url "https://github.com/r5n-labs/vigil/releases/download/${TAG}/vigil-linux-x64.tar.gz"
+                sha256 "${sha_linux_x64}"
+              end
+            end
+
+            def install
+              bin.install "vigil"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/vigil --version", 1)
+            end
+          end
+          RUBY
+
+          sed -i '' 's/^          //' Formula/vigil.rb
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/vigil.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: bump vigil to ${TAG}"
+          git push
