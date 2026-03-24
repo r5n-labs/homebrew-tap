@@ -1,0 +1,61 @@
+name: Auto-update casks
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-invoicy:
+    runs-on: r5n-m2-ultra
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check for Invoicy update
+        id: check
+        run: |
+          set -euo pipefail
+          REMOTE=$(curl -sf https://releases.r5n.dev/Invoicy-macos-arm64.json)
+          REMOTE_VERSION=$(echo "$REMOTE" | jq -r '.version')
+          REMOTE_SHA256=$(echo "$REMOTE" | jq -r '.sha256')
+
+          LOCAL_VERSION=$(sed -n 's/.*version "\(.*\)"/\1/p' Casks/invoicy.rb)
+
+          if [ "$REMOTE_VERSION" = "$LOCAL_VERSION" ]; then
+            echo "Already up to date ($LOCAL_VERSION)"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Update available: $LOCAL_VERSION -> $REMOTE_VERSION"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "version=$REMOTE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha256=$REMOTE_SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update cask
+        if: steps.check.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          SHA256: ${{ steps.check.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          CASK="Casks/invoicy.rb"
+
+          sed -i '' "s/version \".*\"/version \"${VERSION}\"/" "$CASK"
+          sed -i '' "s/sha256 .*/sha256 \"${SHA256}\"/" "$CASK"
+
+          cat "$CASK"
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/invoicy.rb
+          git commit -m "chore: bump invoicy to ${VERSION}"
+          git push
