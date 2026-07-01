@@ -1,26 +1,26 @@
 class Vigil < Formula
   desc "Self-custody crypto wallet for the terminal"
   homepage "https://vigil.r5n.dev"
-  version "0.7.1"
+  version "0.7.2"
   license "FSL-1.1-ALv2"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://releases.r5n.dev/vigil/v0.7.1/vigil-darwin-arm64.tar.gz"
-      sha256 "bb398fa0d2745d0d1f15bbc297ce3fa08a0edbfe0806aa46e2268adbbf73dc1a"
+      url "https://releases.r5n.dev/vigil/v0.7.2/vigil-darwin-arm64.tar.gz"
+      sha256 "351e3d46f2eeb02d96f18de9aee8ab31cf65d22abf3401a103b3d62dc1fa21da"
     else
-      url "https://releases.r5n.dev/vigil/v0.7.1/vigil-darwin-x64.tar.gz"
-      sha256 "0496519a1db533a8c1fb3084294f644fcdb3d578d24b2287f256cb11a6ce9896"
+      url "https://releases.r5n.dev/vigil/v0.7.2/vigil-darwin-x64.tar.gz"
+      sha256 "ef0c2e91535608acee08b18ef6de15922d9ca0c816cc8df8a6fb6a077378cda2"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://releases.r5n.dev/vigil/v0.7.1/vigil-linux-arm64.tar.gz"
-      sha256 "74ea334b071ff966de030396adc570f9aa17483fed12ea998946d973611de619"
+      url "https://releases.r5n.dev/vigil/v0.7.2/vigil-linux-arm64.tar.gz"
+      sha256 "e55ee0c511fe8ad5a841bc8dd2a2a6b24e4ae41ef24b8b6e0f58459538ddc9f3"
     else
-      url "https://releases.r5n.dev/vigil/v0.7.1/vigil-linux-x64.tar.gz"
-      sha256 "eeae7167281d0942a3694a94ec3ffd944b48591b7d4c6bb2b5eee7b02561e1fb"
+      url "https://releases.r5n.dev/vigil/v0.7.2/vigil-linux-x64.tar.gz"
+      sha256 "93ba5e9bece4f7b72f5e0a118da42cab2a624ea50b03bf09a3a809ec42c66ac0"
     end
   end
 
