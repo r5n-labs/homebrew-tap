@@ -1,0 +1,91 @@
+name: Auto-update casks
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-invoicy:
+    runs-on: r5n-m2-ultra
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check for Invoicy update
+        id: check
+        run: |
+          set -euo pipefail
+          MANIFEST_URL="https://releases.r5n.dev/Invoicy-macos-arm64.json"
+          MANIFEST=$(mktemp)
+          HTTP_CODE=$(curl -s -o "$MANIFEST" -w '%{http_code}' "$MANIFEST_URL" || echo 000)
+
+          # Invoicy has not shipped a release manifest yet — a missing
+          # manifest is the expected steady state, not a failure. Anything
+          # other than 200/404 (DNS, 5xx, truncated) is a real error.
+          if [ "$HTTP_CODE" = "404" ]; then
+            echo "::warning::Invoicy manifest not published yet ($MANIFEST_URL is 404) — nothing to update"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Fetching Invoicy manifest failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+          REMOTE_VERSION=$(jq -r '.version // empty' "$MANIFEST")
+          REMOTE_SHA256=$(jq -r '.sha256 // empty' "$MANIFEST")
+          if [ -z "$REMOTE_VERSION" ] || [ -z "$REMOTE_SHA256" ]; then
+            echo "::error::Invoicy manifest is malformed (missing version/sha256)"
+            exit 1
+          fi
+          # The manifest is remote input that flows into sed and a commit
+          # message — hold it to strict formats before using it anywhere.
+          if ! printf '%s' "$REMOTE_VERSION" | grep -Eq '^[0-9A-Za-z.-]+$'; then
+            echo "::error::Invoicy manifest version has unexpected characters"
+            exit 1
+          fi
+          if ! printf '%s' "$REMOTE_SHA256" | grep -Eq '^[0-9a-f]{64}$'; then
+            echo "::error::Invoicy manifest sha256 is not a hex digest"
+            exit 1
+          fi
+
+          LOCAL_VERSION=$(sed -n 's/.*version "\(.*\)"/\1/p' Casks/invoicy.rb)
+
+          if [ "$REMOTE_VERSION" = "$LOCAL_VERSION" ]; then
+            echo "Already up to date ($LOCAL_VERSION)"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Update available: $LOCAL_VERSION -> $REMOTE_VERSION"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "version=$REMOTE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha256=$REMOTE_SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update cask
+        if: steps.check.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          SHA256: ${{ steps.check.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          CASK="Casks/invoicy.rb"
+
+          sed -i '' "s/version \".*\"/version \"${VERSION}\"/" "$CASK"
+          sed -i '' "s/sha256 .*/sha256 \"${SHA256}\"/" "$CASK"
+
+          cat "$CASK"
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/invoicy.rb
+          git commit -m "chore: bump invoicy to ${VERSION}"
+          git push
