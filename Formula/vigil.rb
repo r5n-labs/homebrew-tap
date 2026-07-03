@@ -29,6 +29,11 @@ class Vigil < Formula
     # staging (it descends into a single root dir), so the binary stages as
     # ./vigil — NOT ./bin/vigil, so installing the "bin/vigil" path ENOENTs.
     bin.install "vigil"
+    # darwin tarballs ship the Touch ID helper as a SIBLING of vigil, and the
+    # runtime resolves it via dirname(process.execPath) — installing only
+    # "vigil" silently ships brew installs WITHOUT biometric unlock. Linux
+    # tarballs have no helper, hence the existence guard.
+    bin.install "vigil-touchid" if File.exist?("vigil-touchid")
   end
 
   test do
