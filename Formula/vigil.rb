@@ -7,20 +7,20 @@ class Vigil < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://releases.r5n.dev/vigil/v0.10.1/vigil-darwin-arm64.tar.gz"
-      sha256 "221f0ca96fcca2597c78dfa70bd4d05748121cecfa0942568a5edf4dd43c1023"
+      sha256 "09f37f63af5598f9fa2d9b40db494ecf756dd44c4ca1f702e931aeb27c1bf0cf"
     else
       url "https://releases.r5n.dev/vigil/v0.10.1/vigil-darwin-x64.tar.gz"
-      sha256 "82a33c94eb4a8f61b3d666cb8139628a630e54341b00730a6405b8dc44947c3b"
+      sha256 "fe202ab6cc0130db918ff99fa2d1d273c47c62d2fb572b4014ba036064d7b113"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://releases.r5n.dev/vigil/v0.10.1/vigil-linux-arm64.tar.gz"
-      sha256 "b5a378f2978b4db3f87668dac5053b3b20f0803a86f5eb58fd52a5d411f7fa04"
+      sha256 "15baa64f98143e350e2af195135550d5603d44dcf44812736010671d743f19e9"
     else
       url "https://releases.r5n.dev/vigil/v0.10.1/vigil-linux-x64.tar.gz"
-      sha256 "18f6997dcbb0a7af8583e7ee38337833aea88827245665bd688e606e28c7410d"
+      sha256 "6ea4cf6f565375bc87a7f61f40e498405b74a6b33cc223308a6e212ba1078cd3"
     end
   end
 
