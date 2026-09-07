@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 cask "invoicy" do
-  version "0.11.1"
-  sha256 "8f7e5ab6277d01f13511648475370b7100e04f2583f535465dfbbf6f704ad8b3"
+  version "0.12.0"
+  sha256 "524187ca8ec9863473f7702274e424883eaa846ec6dbd329751f3b06cbeeb65e"
 
   url "https://releases.r5n.dev/invoicy/Invoicy-#{version}-macos-arm64.dmg"
   name "Invoicy"
