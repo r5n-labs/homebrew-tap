@@ -30,10 +30,8 @@ brew install --cask r5n-labs/tap/invoicy
 | Platform | Architecture |
 |----------|-------------|
 | macOS | arm64 |
-| Windows | x64 |
-| Linux | x64 |
 
-Windows and Linux installers available at [releases.r5n.dev](https://releases.r5n.dev).
+The signed macOS arm64 installer is also available from [Invoicy releases](https://github.com/r5n-labs/invoicy/releases).
 
 ## Updating
 
