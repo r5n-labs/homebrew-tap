@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 cask "invoicy" do
-  version "0.10.1"
-  sha256 "7d0aeb5b006ea8510c058d1a2b1125b6af069b09befee7e812f3ef5675cbb49a"
+  version "0.11.1"
+  sha256 "8f7e5ab6277d01f13511648475370b7100e04f2583f535465dfbbf6f704ad8b3"
 
   url "https://releases.r5n.dev/invoicy/Invoicy-#{version}-macos-arm64.dmg"
   name "Invoicy"
-  desc "TBA"
+  desc "Local-first invoicing for Polish sole proprietors"
   homepage "https://r5n.dev/"
 
   livecheck do
@@ -16,6 +16,7 @@ cask "invoicy" do
     end
   end
 
+  depends_on arch: :arm64
   depends_on macos: :ventura
 
   app "Invoicy.app"

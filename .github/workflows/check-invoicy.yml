@@ -1,0 +1,64 @@
+name: Validate Invoicy cask
+
+on:
+  pull_request:
+    paths:
+      - Casks/invoicy.rb
+      - .github/workflows/check-invoicy.yml
+  push:
+    branches: [main]
+    paths:
+      - Casks/invoicy.rb
+      - .github/workflows/check-invoicy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: invoicy-cask-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: r5n-m2-ultra
+    timeout-minutes: 10
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Audit cask and verify the published installer
+        shell: bash
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/invoicy-cask-config-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          brew trust --cask r5n-labs/tap/invoicy
+          brew trust --formula r5n-labs/tap/vigil
+          brew tap r5n-labs/tap
+          audit_tap=$(brew --repository r5n-labs/tap)
+          audit_cask="$audit_tap/Casks/invoicy.rb"
+          test -f "$audit_cask"
+          test ! -L "$audit_cask"
+          temporary=$(mktemp -d "$RUNNER_TEMP/invoicy-cask.XXXXXX")
+          cp "$audit_cask" "$temporary/original.rb"
+          trap 'cp "$temporary/original.rb" "$audit_cask"; rm -rf "$temporary"' EXIT
+          cp Casks/invoicy.rb "$audit_cask"
+          ruby -c "$audit_cask"
+          brew style "$audit_cask"
+          brew audit --cask r5n-labs/tap/invoicy
+          brew info --json=v2 --cask r5n-labs/tap/invoicy > "$temporary/info.json"
+          url=$(jq -er '.casks[0].url' "$temporary/info.json")
+          checksum=$(jq -er '.casks[0].sha256' "$temporary/info.json")
+          [[ "$url" =~ ^https://releases\.r5n\.dev/invoicy/Invoicy-[0-9]+\.[0-9]+\.[0-9]+-macos-arm64\.dmg$ ]]
+          [[ "$checksum" =~ ^[a-f0-9]{64}$ ]]
+          curl --fail --silent --show-error --location --proto '=https' \
+            --connect-timeout 15 --max-time 120 --max-filesize 268435456 \
+            --output "$temporary/installer.dmg" "$url"
+          printf '%s  %s\n' "$checksum" "$temporary/installer.dmg" | shasum -a 256 --check
+          codesign --verify --strict --verbose=2 "$temporary/installer.dmg"
+          spctl --assess --type open --context context:primary-signature --verbose=4 "$temporary/installer.dmg"
+          xcrun stapler validate "$temporary/installer.dmg"
