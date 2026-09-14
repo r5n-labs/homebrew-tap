@@ -1,47 +1,47 @@
 class Vigil < Formula
   desc "Self-custody crypto wallet for the terminal"
   homepage "https://vigil.r5n.dev"
-  version "0.11.4"
+  version "0.11.6"
   license "FSL-1.1-ALv2"
 
   depends_on "minisign" => :build
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://releases.r5n.dev/vigil/v0.11.4/vigil-darwin-arm64.tar.gz", using: :nounzip
-      sha256 "e1009bc4f7bb9be5e2e4902fb82306d7ef7ed1f3fb000e6760615a3e0b049735"
+      url "https://releases.r5n.dev/vigil/v0.11.6/vigil-darwin-arm64.tar.gz", using: :nounzip
+      sha256 "24d666307b0d76616049c8524db1f618dac5b4fc673f335fb496d94392db487e"
 
       resource "release-signature" do
-        url "https://releases.r5n.dev/vigil/v0.11.4/vigil-darwin-arm64.tar.gz.minisig", using: :nounzip
-        sha256 "4e8012ce861d7f08922b6300430931e6d5495f1c9b89af38f55af3d1510185a1"
+        url "https://releases.r5n.dev/vigil/v0.11.6/vigil-darwin-arm64.tar.gz.minisig", using: :nounzip
+        sha256 "858599a18e5dd0901bc6188420db2fce25a0ed0a9dbea6a93682e1847e7767b4"
       end
     else
-      url "https://releases.r5n.dev/vigil/v0.11.4/vigil-darwin-x64.tar.gz", using: :nounzip
-      sha256 "bb8777c4965c1b86e9d1d9fed8dfe072b1e0a8fc82e9fdecbae3fff1b691c89e"
+      url "https://releases.r5n.dev/vigil/v0.11.6/vigil-darwin-x64.tar.gz", using: :nounzip
+      sha256 "a7c58b4c145d8c04ab2a4c1512347179dae859f74bdcb81f0d78652cf8738584"
 
       resource "release-signature" do
-        url "https://releases.r5n.dev/vigil/v0.11.4/vigil-darwin-x64.tar.gz.minisig", using: :nounzip
-        sha256 "e5a26b46324688354383f4d79582d17f84c8595e02e6f1e387623dfa30422d0b"
+        url "https://releases.r5n.dev/vigil/v0.11.6/vigil-darwin-x64.tar.gz.minisig", using: :nounzip
+        sha256 "f8d24fda8e6bb6d7a127c92615d9b61498106bdbbea5e96f11b8abb02bd7bf8a"
       end
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://releases.r5n.dev/vigil/v0.11.4/vigil-linux-arm64.tar.gz", using: :nounzip
-      sha256 "859566fad9b6832d23add41732b744fb12156fc0b3c1429f1638af5b08527909"
+      url "https://releases.r5n.dev/vigil/v0.11.6/vigil-linux-arm64.tar.gz", using: :nounzip
+      sha256 "fc33c20f65b4d2f913662124c2a366d56589703b6bee317c1b05541a0b2da06d"
 
       resource "release-signature" do
-        url "https://releases.r5n.dev/vigil/v0.11.4/vigil-linux-arm64.tar.gz.minisig", using: :nounzip
-        sha256 "e75c39eb500866e19adf6de3f1f2a22a91d09541b4df9627e86c76ccdcbf3a7d"
+        url "https://releases.r5n.dev/vigil/v0.11.6/vigil-linux-arm64.tar.gz.minisig", using: :nounzip
+        sha256 "c959552cb399d3da496124249f2032d5a703edcf95b5c78168e9dfa1293a3814"
       end
     else
-      url "https://releases.r5n.dev/vigil/v0.11.4/vigil-linux-x64.tar.gz", using: :nounzip
-      sha256 "eb98390de8b1b69ccc4f72d074fd03534be2ec2de97e8e033af03993979ea935"
+      url "https://releases.r5n.dev/vigil/v0.11.6/vigil-linux-x64.tar.gz", using: :nounzip
+      sha256 "466db37752b4ce703964a9d197aadbef7bb2fa30f7208415045e380456813ae1"
 
       resource "release-signature" do
-        url "https://releases.r5n.dev/vigil/v0.11.4/vigil-linux-x64.tar.gz.minisig", using: :nounzip
-        sha256 "e49ad0dc3fda469274acb7b181a57fce622d929f6b050f1814df86b6dbac9f12"
+        url "https://releases.r5n.dev/vigil/v0.11.6/vigil-linux-x64.tar.gz.minisig", using: :nounzip
+        sha256 "b2319fec39ed8dd381d9477fa16016e59847e7f0a91dc5a1467511a73e24709a"
       end
     end
   end
